@@ -1,7 +1,7 @@
 package com.baddesigns.android.projects.helpers.generators.MainScreen
 
 import com.baddesigns.android.projects.models.data_models.ListItemModel
-import com.baddesigns.android.projects.models.data_models.MainScreenModel
+import com.baddesigns.android.projects.models.data_models.ListsDataModel
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
 import com.baddesigns.android.projects.models.view_models.MainScreenViewModel
 
@@ -10,51 +10,80 @@ import com.baddesigns.android.projects.models.view_models.MainScreenViewModel
  */
 class ModelGenerator {
 
-    fun generateDataModel() : MainScreenModel {
+    fun generateConnectedDataModel() : ListsDataModel {
+        val projectsList: MutableList<ListItemModel> = generateProjectsDataModelList()
+        val librariesList: MutableList<ListItemModel> = generateLibrariesDataModelList()
+        connectAnyDataModels(projectsList[0], librariesList[5])
+        connectAnyDataModels(projectsList[0], librariesList[6])
+        connectAnyDataModels(projectsList[1], librariesList[2])
+        connectAnyDataModels(projectsList[1], librariesList[3])
+        connectAnyDataModels(projectsList[1], librariesList[5])
+
+        return ListsDataModel(projectsList, librariesList)
+    }
+
+    fun generateDisconnectedDataModel() : ListsDataModel {
         val projectsList: MutableList<ListItemModel> = generateProjectsDataModelList()
         val librariesList: MutableList<ListItemModel> = generateLibrariesDataModelList()
 
-        return MainScreenModel(projectsList, librariesList)
+        return ListsDataModel(projectsList, librariesList)
     }
 
-    fun generateViewModel() : MainScreenViewModel {
+    fun generateDisconnectedViewModel() : MainScreenViewModel {
         val projectsListViewModels: MutableList<ListItemViewModel> = generateProjectsViewModelList()
         val librariesListViewModels: MutableList<ListItemViewModel> = generateLibrariesViewModelList()
 
         return MainScreenViewModel(projectsListViewModels, librariesListViewModels)
     }
+}
 
-    fun generateProjectsDataModelList() : MutableList<ListItemModel> {
-        return mutableListOf(
-                ListItemModel(name = "Projects", selected = true),
-                ListItemModel(name = "Spoiler Free"),
-                ListItemModel(name = "AI")
-        )
-    }
+fun connectAnyDataModels(item1: ListItemModel, item2: ListItemModel) {
+    item1.connections.add(item2.id)
+    item2.connections.add(item1.id)
+}
 
-    fun generateLibrariesDataModelList() : MutableList<ListItemModel> {
-        return mutableListOf(
-                ListItemModel(name = "RxJava"),
-                ListItemModel(name = "Room", selected = true),
-                ListItemModel(name = "Retrofit"),
-                ListItemModel(name = "Firebase")
-        )
-    }
+fun generateProjectsDataModelList() : MutableList<ListItemModel> {
+    return mutableListOf(
+            ListItemModel(name = "Projects"),
+            ListItemModel(name = "Spoiler Free"),
+            ListItemModel(name = "AI")
+    )
+}
 
-    fun generateProjectsViewModelList() : MutableList<ListItemViewModel> {
-        return mutableListOf(
-                ListItemViewModel("Projects", true),
-                ListItemViewModel("Spoiler Free"),
-                ListItemViewModel("AI")
-        )
-    }
+fun generateLibrariesDataModelList() : MutableList<ListItemModel> {
+    return mutableListOf(
+            ListItemModel(name = "RxJava"),
+            ListItemModel(name = "OkHTTP"),
+            ListItemModel(name = "Retrofit"),
+            ListItemModel(name = "Fuel"),
+            ListItemModel(name = "SQLite"),
+            ListItemModel(name = "Realm"),
+            ListItemModel(name = "Room"),
+            ListItemModel(name = "Anko"),
+            ListItemModel(name = "DBFlow"),
+            ListItemModel(name = "Firebase")
+    )
+}
 
-    fun generateLibrariesViewModelList() : MutableList<ListItemViewModel> {
-        return mutableListOf(
-                ListItemViewModel("RxJava"),
-                ListItemViewModel("Room", true),
-                ListItemViewModel("Retrofit"),
-                ListItemViewModel("Firebase")
-        )
-    }
+fun generateProjectsViewModelList() : MutableList<ListItemViewModel> {
+    return mutableListOf(
+            ListItemViewModel("Projects", true),
+            ListItemViewModel("Spoiler Free"),
+            ListItemViewModel("AI")
+    )
+}
+
+fun generateLibrariesViewModelList() : MutableList<ListItemViewModel> {
+    return mutableListOf(
+            ListItemViewModel(name = "RxJava"),
+            ListItemViewModel(name = "OkHTTP"),
+            ListItemViewModel(name = "Retrofit", selected = true),
+            ListItemViewModel(name = "Fuel"),
+            ListItemViewModel(name = "SQLite"),
+            ListItemViewModel(name = "Realm", selected = true),
+            ListItemViewModel(name = "Room"),
+            ListItemViewModel(name = "Anko"),
+            ListItemViewModel(name = "DBFlow"),
+            ListItemViewModel(name = "Firebase")
+    )
 }

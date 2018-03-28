@@ -24,3 +24,8 @@ fun generateLibrariesDataModelList() : MutableList<ListItemModel> {
             ListItemModel(name = "Firebase")
     )
 }
+
+fun connectAnyDataModels(item1: ListItemModel, item2: ListItemModel) {
+    item1.connections.add(item2.id)
+    item2.connections.add(item1.id)
+}

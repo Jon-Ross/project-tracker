@@ -46,15 +46,13 @@ class ListViewHolderTest {
         viewHolder.bindView(ListItemViewModel(
                 "hello",
                 false,
-                true,
-                false))
+                true))
 
         val nameView: TextView = viewHolder.itemView.findViewById(R.id.itemName)
         val checkBoxView: AppCompatCheckBox = viewHolder.itemView.findViewById(R.id.itemCheckBox)
         assertEquals("hello", nameView.text)
         assertFalse(checkBoxView.isChecked)
         assertEquals(View.VISIBLE, checkBoxView.visibility)
-        assertEquals(View.VISIBLE, viewHolder.itemView.visibility)
     }
 
     @Test
@@ -62,8 +60,7 @@ class ListViewHolderTest {
         viewHolder.bindView(ListItemViewModel(
                 "hello",
                 true,
-                false,
-                true))
+                false))
 
         val nameView: TextView = viewHolder.itemView.findViewById(R.id.itemName)
         val checkBoxView: AppCompatCheckBox = viewHolder.itemView.findViewById(R.id.itemCheckBox)
@@ -71,7 +68,6 @@ class ListViewHolderTest {
         assertEquals("hello", nameView.text)
         assertTrue(checkBoxView.isChecked)
         assertEquals(View.GONE, checkBoxView.visibility)
-        assertEquals(View.GONE, viewHolder.itemView.visibility)
     }
 
     @Test
@@ -86,7 +82,7 @@ class ListViewHolderTest {
         checkBoxView.performClick()
 
         assertTrue(item.selected)
-        verify(callback).checkboxClicked(true)
+        verify(callback).checkboxClicked(true, item.id)
     }
 
     @Test
@@ -101,7 +97,7 @@ class ListViewHolderTest {
         checkBoxView.performClick()
 
         assertFalse(item.selected)
-        verify(callback).checkboxClicked(false)
+        verify(callback).checkboxClicked(false, item.id)
     }
 
     @Test

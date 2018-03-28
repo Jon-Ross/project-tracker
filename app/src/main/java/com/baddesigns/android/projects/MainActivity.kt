@@ -6,7 +6,8 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
-import com.baddesigns.android.projects.data_providers.SimpleDataProvider
+import com.baddesigns.android.projects.data_providers.DummyDataProvider
+import com.baddesigns.android.projects.generaters.connectAnyDataModels
 import com.baddesigns.android.projects.generaters.generateLibrariesDataModelList
 import com.baddesigns.android.projects.generaters.generateProjectsDataModelList
 import com.baddesigns.android.projects.mappers.MainScreenMapper
@@ -24,34 +25,19 @@ class MainActivity : AppCompatActivity(), MainScreenContract.View {
     internal var upArrowDrawable: Drawable? = null
     internal var downArrowDrawable: Drawable? = null
 
-    internal val projectsListCheckboxListener: ListAdapter.Callback = object : ListAdapter.Callback {
+    internal val projectsListItemCheckboxCallback: ListViewHolder.Callback =
+            object : ListViewHolder.Callback {
 
-        override fun setAllCheckboxesVisibility(showing: Boolean) {
-            librariesAdapter.setAllCheckboxesVisibility(showing)
-        }
+                override fun checkboxClicked(checked: Boolean, id: UUID) {
+                    presenter.projectsListItemCheckboxClicked(checked, id)
+                }
+            }
 
-        override fun filterList(ids: List<UUID>) {
-            librariesAdapter.filterList(ids)
-        }
+    internal val librariesListItemCheckboxCallback: ListViewHolder.Callback =
+            object : ListViewHolder.Callback {
 
-        override fun removeFilter() {
-            librariesAdapter.removeFilter()
-        }
-    }
-
-    internal val librariesListCheckboxListener: ListAdapter.Callback = object : ListAdapter
-    .Callback {
-
-        override fun setAllCheckboxesVisibility(showing: Boolean) {
-            projectsAdapter.setAllCheckboxesVisibility(showing)
-        }
-
-        override fun filterList(ids: List<UUID>) {
-            projectsAdapter.filterList(ids)
-        }
-
-        override fun removeFilter() {
-            projectsAdapter.removeFilter()
+        override fun checkboxClicked(checked: Boolean, id: UUID) {
+            presenter.librariesListItemCheckboxClicked(checked, id)
         }
     }
 
@@ -71,11 +57,11 @@ class MainActivity : AppCompatActivity(), MainScreenContract.View {
     }
 
     override fun updateProjectsListView(projectsListViewModel: List<ListItemViewModel>) {
-        projectsAdapter.updateList(projectsListViewModel)
+        projectsAdapter.setListItems(projectsListViewModel)
     }
 
     override fun updateLibrariesListView(librariesListViewModel: List<ListItemViewModel>) {
-        librariesAdapter.updateList(librariesListViewModel)
+        librariesAdapter.setListItems(librariesListViewModel)
     }
 
     override fun changeProjectsListVisibility(visible: Boolean) {
@@ -100,6 +86,16 @@ class MainActivity : AppCompatActivity(), MainScreenContract.View {
         librariesHeaderArrow.setImageDrawable(arrowDrawable)
     }
 
+    // TODO:
+    override fun getProjectsList() : List<ListItemViewModel> {
+        return mutableListOf()
+    }
+
+    // TODO:
+    override fun getLibrariesList() : List<ListItemViewModel> {
+        return mutableListOf()
+    }
+
     private fun setProjectsListVisibility(showing: Boolean) {
         changeProjectsHeaderArrow(showing)
         changeProjectsListVisibility(showing)
@@ -112,13 +108,11 @@ class MainActivity : AppCompatActivity(), MainScreenContract.View {
 
     private fun initListsViews() {
         projectsListView.layoutManager = LinearLayoutManager(this)
-        projectsAdapter = ListAdapter(mutableListOf())
-        projectsAdapter.setCallback(projectsListCheckboxListener)
+        projectsAdapter = ListAdapter(mutableListOf(), projectsListItemCheckboxCallback)
         projectsListView.adapter = projectsAdapter
 
         librariesListView.layoutManager = LinearLayoutManager(this)
-        librariesAdapter = ListAdapter(mutableListOf())
-        librariesAdapter.setCallback(librariesListCheckboxListener)
+        librariesAdapter = ListAdapter(mutableListOf(), librariesListItemCheckboxCallback)
         librariesListView.adapter = librariesAdapter
     }
 
@@ -133,17 +127,17 @@ class MainActivity : AppCompatActivity(), MainScreenContract.View {
     private fun initPresenter() {
         val projects = generateProjectsDataModelList()
         val libraries = generateLibrariesDataModelList()
-        SimpleDataProvider.addProjectItems(projects)
-        SimpleDataProvider.addLibraryItems(libraries)
-        SimpleDataProvider.connectItems(projects[0], libraries[5])
-        SimpleDataProvider.connectItems(projects[0], libraries[6])
-        SimpleDataProvider.connectItems(projects[1], libraries[0])
-        SimpleDataProvider.connectItems(projects[1], libraries[1])
-        SimpleDataProvider.connectItems(projects[1], libraries[2])
-        SimpleDataProvider.connectItems(projects[1], libraries[5])
-        SimpleDataProvider.connectItems(projects[1], libraries[6])
+        connectAnyDataModels(projects[0], libraries[5])
+        connectAnyDataModels(projects[0], libraries[6])
+        connectAnyDataModels(projects[1], libraries[2])
+        connectAnyDataModels(projects[1], libraries[3])
+        connectAnyDataModels(projects[1], libraries[5])
+        connectAnyDataModels(projects[2], libraries[0])
 
-        presenter = MainScreenPresenter(SimpleDataProvider, MainScreenMapper())
+        DummyDataProvider.addLibraryItems(libraries)
+        DummyDataProvider.addProjectItems(projects)
+
+        presenter = MainScreenPresenter(DummyDataProvider, MainScreenMapper())
         presenter.setView(this)
     }
 

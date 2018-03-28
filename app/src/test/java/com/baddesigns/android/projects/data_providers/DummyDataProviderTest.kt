@@ -2,6 +2,7 @@ package com.baddesigns.android.projects.data_providers
 
 import com.baddesigns.android.projects.helpers.generators.MainScreen.ModelGenerator
 import com.baddesigns.android.projects.models.data_models.ListItemModel
+import com.baddesigns.android.projects.models.data_models.ListsDataModel
 import junit.framework.Assert.*
 import org.junit.After
 import org.junit.Before
@@ -13,24 +14,26 @@ import org.mockito.MockitoAnnotations.initMocks
 /**
  * Created by Jon-Ross on 25/03/2018.
  */
-class SimpleDataProviderTest {
+class DummyDataProviderTest {
 
     @Mock
     private lateinit var callback: IMainScreenDataProvider.Callback
 
-    private lateinit var dataProvider: SimpleDataProvider
+    private lateinit var dataProvider: DummyDataProvider
 
-    private lateinit var modelGenerator: ModelGenerator
+    private val modelGenerator = ModelGenerator()
+    private lateinit var dataModel: ListsDataModel
 
     @Before
     fun setUp() {
         initMocks(this)
 
-        modelGenerator = ModelGenerator()
-        dataProvider = SimpleDataProvider
+        dataProvider = DummyDataProvider
 
-        dataProvider.addLibraryItems(modelGenerator.generateLibrariesDataModelList())
-        dataProvider.addProjectItems(modelGenerator.generateProjectsDataModelList())
+        dataModel = modelGenerator.generateDisconnectedDataModel()
+
+        dataProvider.addProjectItems(dataModel.projectsList)
+        dataProvider.addLibraryItems(dataModel.librariesList)
     }
 
     @After
@@ -41,7 +44,7 @@ class SimpleDataProviderTest {
     @Test
     fun addProjectItems_varargs() {
         dataProvider.clearDb()
-        val projectsItems = modelGenerator.generateProjectsDataModelList()
+        val projectsItems = dataModel.projectsList
 
         projectsItems.forEach {
             dataProvider.addProjectItems(it)
@@ -54,7 +57,7 @@ class SimpleDataProviderTest {
     @Test
     fun addProjectItems_list() {
         dataProvider.clearDb()
-        val projectsItems = modelGenerator.generateProjectsDataModelList()
+        val projectsItems = dataModel.projectsList
 
         dataProvider.addProjectItems(projectsItems)
 
@@ -65,32 +68,37 @@ class SimpleDataProviderTest {
     @Test
     fun addLibraryItems_varargs() {
         dataProvider.clearDb()
-        val libraryItems = modelGenerator.generateLibrariesDataModelList()
+        val libraryItems = dataModel.librariesList
 
         libraryItems.forEach {
             dataProvider.addLibraryItems(it)
         }
 
-        assertEquals(4, dataProvider.model.librariesList.size)
+        assertEquals(10, dataProvider.model.librariesList.size)
         assertEquals(libraryItems, dataProvider.model.librariesList)
     }
 
     @Test
     fun addLibraryItems_list() {
         dataProvider.clearDb()
-        val libraryItems = modelGenerator.generateLibrariesDataModelList()
+        val libraryItems = dataModel.librariesList
 
         dataProvider.addLibraryItems(libraryItems)
 
-        assertEquals(4, dataProvider.model.librariesList.size)
+        assertEquals(10, dataProvider.model.librariesList.size)
         assertEquals(libraryItems, dataProvider.model.librariesList)
     }
 
     @Test
-    fun fetchLists() {
+    fun fetchLists_withCallback() {
         dataProvider.fetchLists(callback)
 
         verify(callback).onListsRetrieved(dataProvider.model)
+    }
+
+    @Test
+    fun fetchLists() {
+        assertEquals(dataProvider.model, dataProvider.fetchLists())
     }
 
     @Test
@@ -139,8 +147,8 @@ class SimpleDataProviderTest {
 
     @Test
     fun clearDb() {
-        dataProvider.addProjectItems(modelGenerator.generateProjectsDataModelList())
-        dataProvider.addLibraryItems(modelGenerator.generateLibrariesDataModelList())
+        dataProvider.addProjectItems(dataModel.projectsList)
+        dataProvider.addLibraryItems(dataModel.librariesList)
 
         dataProvider.clearDb()
 

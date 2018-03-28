@@ -8,5 +8,4 @@ import java.util.*
 data class ListItemModel(
         val id: UUID = UUID.randomUUID(),
         val name: String = "",
-        val selected: Boolean = false,
         val connections: MutableSet<UUID> = mutableSetOf())

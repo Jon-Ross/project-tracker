@@ -1,7 +1,7 @@
 package com.baddesigns.android.projects.mappers
 
 import com.baddesigns.android.projects.models.data_models.ListItemModel
-import com.baddesigns.android.projects.models.data_models.MainScreenModel
+import com.baddesigns.android.projects.models.data_models.ListsDataModel
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
 import com.baddesigns.android.projects.models.view_models.MainScreenViewModel
 
@@ -10,7 +10,7 @@ import com.baddesigns.android.projects.models.view_models.MainScreenViewModel
  */
 class MainScreenMapper {
 
-    fun mapDataToView(model: MainScreenModel) : MainScreenViewModel {
+    fun mapDataToView(model: ListsDataModel) : MainScreenViewModel {
 
         val projectsListViewModels: List<ListItemViewModel> =
                 mapDataModelListToViewModelList(model.projectsList)
@@ -20,17 +20,19 @@ class MainScreenMapper {
         return MainScreenViewModel(projectsListViewModels, librariesListViewModels)
     }
 
-    private fun mapDataModelListToViewModelList(list: List<ListItemModel>) :
+    fun mapDataModelListToViewModelList(list: List<ListItemModel>) :
             List<ListItemViewModel> {
         val viewModelList: MutableList<ListItemViewModel> = mutableListOf()
         list.forEach {
-            viewModelList.add(ListItemViewModel(
-                    name = it.name,
-                    selected = it.selected,
-                    connections = it.connections,
-                    id = it.id)
-            )
+            viewModelList.add(mapDataModelToViewModel(it))
         }
         return viewModelList
+    }
+
+    fun mapDataModelToViewModel(dataModel: ListItemModel) : ListItemViewModel {
+        return ListItemViewModel(
+                name = dataModel.name,
+                id = dataModel.id
+        )
     }
 }

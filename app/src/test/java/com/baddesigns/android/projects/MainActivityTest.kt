@@ -4,8 +4,7 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertNotNull
+import junit.framework.Assert.*
 import kotlinx.android.synthetic.main.activity_main.*
 import org.junit.Before
 import org.junit.Test
@@ -70,13 +69,14 @@ class MainActivityTest {
 
         assertNotNull(activity.projectsListView.layoutManager)
         assertNotNull(activity.projectsAdapter)
-        assertNotNull(activity.projectsAdapter.callback)
         assertNotNull(activity.projectsListView.adapter)
 
         assertNotNull(activity.librariesListView.layoutManager)
         assertNotNull(activity.librariesAdapter)
-        assertNotNull(activity.librariesAdapter.callback)
         assertNotNull(activity.librariesListView.adapter)
+
+        assertTrue(activity.projectsHeaderArrow.hasOnClickListeners())
+        assertTrue(activity.librariesHeaderArrow.hasOnClickListeners())
 
         assertNotNull(activity.presenter)
     }
@@ -92,17 +92,19 @@ class MainActivityTest {
     @Test
     fun updateProjectsListView() {
         val viewModels: List<ListItemViewModel> = mutableListOf()
+
         activity.updateProjectsListView(viewModels)
 
-        verify(projectsAdapter).updateList(viewModels)
+        verify(projectsAdapter).setListItems(viewModels)
     }
 
     @Test
     fun updateLibrariesListView() {
         val viewModels: List<ListItemViewModel> = mutableListOf()
+
         activity.updateLibrariesListView(viewModels)
 
-        verify(librariesAdapter).updateList(viewModels)
+        verify(librariesAdapter).setListItems(viewModels)
     }
 
     @Test
@@ -198,62 +200,22 @@ class MainActivityTest {
     }
 
     @Test
-    fun projectsListCheckboxListenerSetAllCheckboxesVisibility_true() {
-        activity.projectsListCheckboxListener.setAllCheckboxesVisibility(true)
+    fun projectsListItemCheckboxListener_checkboxClicked_delegateToPresenter() {
+        val checked = true
+        val id = UUID.randomUUID()
 
-        verify(librariesAdapter).setAllCheckboxesVisibility(true)
+        activity.projectsListItemCheckboxCallback.checkboxClicked(checked, id)
+
+        verify(presenter).projectsListItemCheckboxClicked(checked, id)
     }
 
     @Test
-    fun projectsListCheckboxListenerSetAllCheckboxesVisibility_false() {
-        activity.projectsListCheckboxListener.setAllCheckboxesVisibility(false)
+    fun librariesListItemCheckboxListener_checkboxClicked_delegateToPresenter() {
+        val checked = true
+        val id = UUID.randomUUID()
 
-        verify(librariesAdapter).setAllCheckboxesVisibility(false)
-    }
+        activity.librariesListItemCheckboxCallback.checkboxClicked(checked, id)
 
-    @Test
-    fun projectsListCheckboxListenerFilterList() {
-        val filteredList = listOf<UUID>(UUID.randomUUID(), UUID.randomUUID())
-
-        activity.projectsListCheckboxListener.filterList(filteredList)
-
-        verify(librariesAdapter).filterList(filteredList)
-    }
-
-    @Test
-    fun projectsListCheckboxListenerRemoveFilter() {
-        activity.projectsListCheckboxListener.removeFilter()
-
-        verify(librariesAdapter).removeFilter()
-    }
-
-    @Test
-    fun librariesListCheckboxListenerSetAllCheckboxesVisibility_true() {
-        activity.librariesListCheckboxListener.setAllCheckboxesVisibility(true)
-
-        verify(projectsAdapter).setAllCheckboxesVisibility(true)
-    }
-
-    @Test
-    fun librariesListCheckboxListenerSetAllCheckboxesVisibility_false() {
-        activity.librariesListCheckboxListener.setAllCheckboxesVisibility(false)
-
-        verify(projectsAdapter).setAllCheckboxesVisibility(false)
-    }
-
-    @Test
-    fun librariesListCheckboxListenerFilterList() {
-        val filteredList = listOf<UUID>(UUID.randomUUID(), UUID.randomUUID())
-
-        activity.librariesListCheckboxListener.filterList(filteredList)
-
-        verify(projectsAdapter).filterList(filteredList)
-    }
-
-    @Test
-    fun librariesListCheckboxListenerRemoveFilter() {
-        activity.librariesListCheckboxListener.removeFilter()
-
-        verify(projectsAdapter).removeFilter()
+        verify(presenter).librariesListItemCheckboxClicked(checked, id)
     }
 }

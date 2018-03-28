@@ -1,14 +1,14 @@
 package com.baddesigns.android.projects.data_providers
 
 import com.baddesigns.android.projects.models.data_models.ListItemModel
-import com.baddesigns.android.projects.models.data_models.MainScreenModel
+import com.baddesigns.android.projects.models.data_models.ListsDataModel
 
 /**
  * Created by Jon-Ross on 25/03/2018.
  */
-object SimpleDataProvider : IMainScreenDataProvider {
+object DummyDataProvider : IMainScreenDataProvider {
 
-    internal val model = MainScreenModel()
+    internal val model = ListsDataModel()
 
     override fun addProjectItems(vararg items: ListItemModel) {
         items.forEach {
@@ -28,6 +28,10 @@ object SimpleDataProvider : IMainScreenDataProvider {
 
     override fun addLibraryItems(items: List<ListItemModel>) {
         model.librariesList.addAll(items)
+    }
+
+    override fun fetchLists() : ListsDataModel {
+        return model
     }
 
     override fun fetchLists(callback: IMainScreenDataProvider.Callback) {
