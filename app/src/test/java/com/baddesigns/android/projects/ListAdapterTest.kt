@@ -140,6 +140,20 @@ class ListAdapterTest {
     }
 
     @Test
+    fun getListItems() {
+        assertEquals(listItems, listAdapter.getListItems())
+    }
+
+    @Test
+    fun setListItems() {
+        val newList = mutableListOf(ListItemViewModel("hello"))
+
+        listAdapter.setListItems(newList)
+
+        assertEquals(newList, listAdapter.items)
+    }
+
+    @Test
     fun updateList() {
         val list: List<ListItemViewModel> = mutableListOf(
                 ListItemViewModel(name = "Projects", selected = true)

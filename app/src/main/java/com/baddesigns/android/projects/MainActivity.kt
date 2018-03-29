@@ -86,14 +86,12 @@ class MainActivity : AppCompatActivity(), MainScreenContract.View {
         librariesHeaderArrow.setImageDrawable(arrowDrawable)
     }
 
-    // TODO:
     override fun getProjectsList() : List<ListItemViewModel> {
-        return mutableListOf()
+        return projectsAdapter.getListItems()
     }
 
-    // TODO:
     override fun getLibrariesList() : List<ListItemViewModel> {
-        return mutableListOf()
+        return librariesAdapter.getListItems()
     }
 
     private fun setProjectsListVisibility(showing: Boolean) {

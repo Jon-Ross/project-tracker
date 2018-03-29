@@ -60,6 +60,10 @@ class ListAdapter(internal var items: List<ListItemViewModel>,
         return count
     }
 
+    fun getListItems() : List<ListItemViewModel> {
+        return items
+    }
+
     fun setListItems(list: List<ListItemViewModel>) {
         items = list
         notifyDataSetChanged()

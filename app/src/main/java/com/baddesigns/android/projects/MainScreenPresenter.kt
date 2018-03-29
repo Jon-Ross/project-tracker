@@ -96,6 +96,43 @@ class MainScreenPresenter(private val dataProvider: IMainScreenDataProvider,
     }
 
     override fun librariesListItemCheckboxClicked(checked: Boolean, id: UUID) {
+        val projectsVM = view.getProjectsList()
+        val librariesVM = view.getLibrariesList()
+        if(checked) {
+            setVisibilityAllViewModelsCheckboxes(projectsVM, false)
+        } else {
+            if(areAllCheckboxesDeselected(librariesVM)) {
+                setVisibilityAllViewModelsCheckboxes(projectsVM, true)
+            }
+        }
+
+        view.updateProjectsListView(projectsVM)
+    }
+
+    private fun areAllCheckboxesSelected(list: List<ListItemViewModel>) : Boolean {
+        for(item in list) {
+            if(!item.selected) return false
+        }
+        return true
+    }
+
+    private fun areAllCheckboxesDeselected(list: List<ListItemViewModel>) : Boolean {
+        for(item in list) {
+            if(item.selected) return false
+        }
+        return true
+    }
+
+    private fun setVisibilityAllViewModelsCheckboxes(list: List<ListItemViewModel>, show: Boolean) {
+        for(item in list) {
+            item.checkboxShowing = show
+        }
+    }
+
+    private fun setCheckedAllViewModelsCheckboxes(list: List<ListItemViewModel>, selected: Boolean) {
+        for(item in list) {
+            item.selected = selected
+        }
     }
 
     override fun setView(view: MainScreenContract.View) {

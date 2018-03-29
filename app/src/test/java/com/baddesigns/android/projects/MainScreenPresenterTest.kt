@@ -3,6 +3,7 @@ package com.baddesigns.android.projects
 import com.baddesigns.android.projects.data_providers.IMainScreenDataProvider
 import com.baddesigns.android.projects.helpers.generators.MainScreen.ModelGenerator
 import com.baddesigns.android.projects.mappers.MainScreenMapper
+import com.baddesigns.android.projects.models.data_models.ListItemModel
 import com.baddesigns.android.projects.models.data_models.ListsDataModel
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
 import junit.framework.Assert.assertEquals
@@ -28,6 +29,8 @@ class MainScreenPresenterTest {
     private lateinit var view: MainScreenContract.View
     @Mock
     private lateinit var mapper: MainScreenMapper
+    private lateinit var allProjects: MutableList<ListItemModel>
+    private lateinit var allLibraries: MutableList<ListItemModel>
 
     private lateinit var presenter: MainScreenPresenter
 
@@ -39,6 +42,10 @@ class MainScreenPresenterTest {
 
         presenter = MainScreenPresenter(dataProvider, mapper)
         presenter.setView(view)
+
+        `when`(dataProvider.fetchLists()).thenReturn(dataModel)
+        allProjects = dataModel.projectsList
+        allLibraries = dataModel.librariesList
     }
 
     @Test
@@ -109,11 +116,10 @@ class MainScreenPresenterTest {
         assertEquals(newView, presenter.view)
     }
 
+    // TODO: need to make a copy of the lists as otherwise when changing their states, they
+    // change them in the implementation too
     @Test
     fun projectsListItemCheckboxClicked_checked_filtersProjectsAndLibraries() {
-        `when`(dataProvider.fetchLists()).thenReturn(dataModel)
-        val allProjects = dataModel.projectsList
-        val allLibraries = dataModel.librariesList
         val mappedProjectVM = modelMapper.mapDataModelToViewModel(allProjects[0])
         `when`(mapper.mapDataModelToViewModel(allProjects[0])).thenReturn(mappedProjectVM)
 
@@ -134,11 +140,10 @@ class MainScreenPresenterTest {
         verify(view).updateLibrariesListView(filteredLibrariesVM)
     }
 
+    // TODO: need to make a copy of the lists as otherwise when changing their states, they
+    // change them in the implementation too
     @Test
     fun projectsListItemCheckboxClicked_unchecked_removesAllFilters() {
-        `when`(dataProvider.fetchLists()).thenReturn(dataModel)
-        val allProjects = dataModel.projectsList
-        val allLibraries = dataModel.librariesList
         val projectsVM = modelMapper.mapDataModelListToViewModelList(allProjects)
         val librariesVM: List<ListItemViewModel> =
                 modelMapper.mapDataModelListToViewModelList(allLibraries)
@@ -154,6 +159,38 @@ class MainScreenPresenterTest {
         verify(view).updateLibrariesListView(librariesVM)
     }
 
+    // TODO: need to make a copy of the lists as otherwise when changing their states, they
+    // change them in the implementation too
+    @Test
+    fun librariesListItemCheckboxClicked_checked_onlyOneCheck_hideProjectsCheckboxes() {
+        val projectsVM = modelMapper.mapDataModelListToViewModelList(allProjects)
+        `when`(view.getProjectsList()).thenReturn(projectsVM)
+
+        setVisibilityAllViewModelsCheckboxes(projectsVM, false)
+
+        presenter.librariesListItemCheckboxClicked(true, UUID.randomUUID())
+
+        verify(view).updateProjectsListView(projectsVM)
+    }
+
+    // TODO: need to make a copy of the lists as otherwise when changing their states, they
+    // change them in the implementation too
+    @Test
+    fun librariesListItemCheckboxClicked_unchecked_noChecks_showProjectsCheckboxes() {
+        val projectsVM = modelMapper.mapDataModelListToViewModelList(allProjects)
+        val librariesVM = modelMapper.mapDataModelListToViewModelList(allLibraries)
+        setCheckedAllViewModelsCheckboxes(librariesVM, false)
+
+        `when`(view.getProjectsList()).thenReturn(projectsVM)
+        `when`(view.getLibrariesList()).thenReturn(librariesVM)
+
+        setVisibilityAllViewModelsCheckboxes(projectsVM, true)
+
+        presenter.librariesListItemCheckboxClicked(false, UUID.randomUUID())
+
+        verify(view).updateProjectsListView(projectsVM)
+    }
+
     private fun resetViewModelsListStates(list: List<ListItemViewModel>) {
         for(item in list) {
             item.checkboxShowing = true
@@ -161,12 +198,15 @@ class MainScreenPresenterTest {
         }
     }
 
-    @Test
-    fun librariesListItemCheckboxClicked_() {
-        val checked = true
-        val id = UUID.randomUUID()
+    private fun setVisibilityAllViewModelsCheckboxes(list: List<ListItemViewModel>, show: Boolean) {
+        for(item in list) {
+            item.checkboxShowing = show
+        }
+    }
 
-        presenter.librariesListItemCheckboxClicked(checked, id)
-
+    private fun setCheckedAllViewModelsCheckboxes(list: List<ListItemViewModel>, selected: Boolean) {
+        for(item in list) {
+            item.selected = selected
+        }
     }
 }

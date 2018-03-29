@@ -218,4 +218,18 @@ class MainActivityTest {
 
         verify(presenter).librariesListItemCheckboxClicked(checked, id)
     }
+
+    @Test
+    fun getProjectsList() {
+        activity.getProjectsList()
+
+        verify(projectsAdapter).getListItems()
+    }
+
+    @Test
+    fun getLibrariesList() {
+        activity.getLibrariesList()
+
+        verify(librariesAdapter).getListItems()
+    }
 }
