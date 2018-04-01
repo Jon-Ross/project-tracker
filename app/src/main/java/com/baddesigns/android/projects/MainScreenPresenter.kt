@@ -21,10 +21,10 @@ class MainScreenPresenter(private val dataProvider: IMainScreenDataProvider,
     }
 
     override fun onListsRetrieved(lists: ListsDataModel) {
-        val dataModel = mapper.mapDataToView(lists)
+        val viewModel = mapper.mapDataToView(lists)
 
-        view.updateProjectsListView(dataModel.projectsList)
-        view.updateLibrariesListView(dataModel.librariesList)
+        view.updateProjectsListView(viewModel.projectsList)
+        view.updateLibrariesListView(viewModel.librariesList)
     }
 
     override fun projectsHeaderArrowClicked(contentsWereShowing: Boolean) {
@@ -79,6 +79,54 @@ class MainScreenPresenter(private val dataProvider: IMainScreenDataProvider,
         view.updateLibrariesListView(librariesVM)
     }
 
+    override fun librariesListItemCheckboxClicked(checked: Boolean, id: UUID) {
+        val projectsVM = view.getProjectsList()
+        val librariesVM = view.getLibrariesList()
+        if(checked) {
+            val library = getItemFromId(id, librariesVM) ?: return
+            val newProjectsVM = filterListWithItem(projectsVM, library)
+            setAllViewModelsCheckboxesVisibility(newProjectsVM, false)
+            view.updateProjectsListView(newProjectsVM)
+            return
+        } else {
+            var filteredProjectsVM = mapper.mapDataToView(dataProvider.getCachedLists()).projectsList
+            for(library in librariesVM) {
+                if(library.selected) {
+                    filteredProjectsVM = filterListWithItem(filteredProjectsVM, library)
+                }
+            }
+            if(areAllCheckboxesDeselected(librariesVM)) {
+                resetViewModelsListStates(filteredProjectsVM)
+            } else {
+                setAllViewModelsCheckboxesVisibility(filteredProjectsVM, false)
+            }
+            view.updateProjectsListView(filteredProjectsVM)
+        }
+    }
+
+    private fun filterListWithItem(
+            list: List<ListItemViewModel>, item: ListItemViewModel) : List<ListItemViewModel> {
+        return list.filter {
+            var filter = false
+            for(con in it.connections) {
+                if(con == item.id) {
+                    filter = true
+                    break
+                }
+            }
+            filter
+        }
+    }
+
+    private fun getItemFromId(id: UUID, list: List<ListItemViewModel>) : ListItemViewModel? {
+        for(item in list) {
+            if(item.id == id) {
+                return item
+            }
+        }
+        return null
+    }
+
     private fun resetViewModelsListStates(list: List<ListItemViewModel>) {
         for(item in list) {
             item.checkboxShowing = true
@@ -95,27 +143,6 @@ class MainScreenPresenter(private val dataProvider: IMainScreenDataProvider,
         return -1
     }
 
-    override fun librariesListItemCheckboxClicked(checked: Boolean, id: UUID) {
-        val projectsVM = view.getProjectsList()
-        val librariesVM = view.getLibrariesList()
-        if(checked) {
-            setVisibilityAllViewModelsCheckboxes(projectsVM, false)
-        } else {
-            if(areAllCheckboxesDeselected(librariesVM)) {
-                setVisibilityAllViewModelsCheckboxes(projectsVM, true)
-            }
-        }
-
-        view.updateProjectsListView(projectsVM)
-    }
-
-    private fun areAllCheckboxesSelected(list: List<ListItemViewModel>) : Boolean {
-        for(item in list) {
-            if(!item.selected) return false
-        }
-        return true
-    }
-
     private fun areAllCheckboxesDeselected(list: List<ListItemViewModel>) : Boolean {
         for(item in list) {
             if(item.selected) return false
@@ -123,15 +150,9 @@ class MainScreenPresenter(private val dataProvider: IMainScreenDataProvider,
         return true
     }
 
-    private fun setVisibilityAllViewModelsCheckboxes(list: List<ListItemViewModel>, show: Boolean) {
+    private fun setAllViewModelsCheckboxesVisibility(list: List<ListItemViewModel>, show: Boolean) {
         for(item in list) {
             item.checkboxShowing = show
-        }
-    }
-
-    private fun setCheckedAllViewModelsCheckboxes(list: List<ListItemViewModel>, selected: Boolean) {
-        for(item in list) {
-            item.selected = selected
         }
     }
 

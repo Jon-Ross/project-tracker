@@ -7,7 +7,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -64,79 +65,6 @@ class ListAdapterTest {
 
         verify(viewHolder).setCallback(listItemCheckboxListener)
         verify(viewHolder).bindView(listAdapter.items[0])
-    }
-
-    @Test
-    fun checkboxClicked_whenChecked_andOnlyOneCheck_allOtherCheckboxesSetToHidden() {
-        val item3 = ListItemViewModel(name = "3", selected = true, checkboxShowing = true)
-        val list = mutableListOf(
-                ListItemViewModel(name = "1", selected = false, checkboxShowing = true),
-                ListItemViewModel(name = "2", selected = false, checkboxShowing = true),
-                item3,
-                ListItemViewModel(name = "4", selected = false, checkboxShowing = true)
-        )
-        listAdapter.items = list
-
-        // TODO:
-//        listAdapter.checkboxClicked(true)
-
-        verify(callback).setAllCheckboxesVisibility(false)
-        verify(callback).filterList(listOf(item3.id))
-    }
-
-    @Test
-    fun checkboxClicked_whenUnchecked_andNoChecks_allOtherCheckboxesSetToHidden_removeFilter() {
-        val list = mutableListOf(
-                ListItemViewModel(name = "1", selected = false, checkboxShowing = true),
-                ListItemViewModel(name = "2", selected = false, checkboxShowing = true),
-                ListItemViewModel(name = "3", selected = false, checkboxShowing = true),
-                ListItemViewModel(name = "4", selected = false, checkboxShowing = true)
-        )
-        listAdapter.items = list
-
-        // TODO:
-//        listAdapter.checkboxClicked(false)
-
-        verify(callback).setAllCheckboxesVisibility(true)
-        verify(callback).removeFilter()
-        verifyNoMoreInteractions(callback)
-    }
-
-    @Test
-    fun checkboxClicked_whenChecked_andMoreThanOneSelected_filterListOnly() {
-        val item1 = ListItemViewModel(name = "1", selected = true, checkboxShowing = true)
-        val item3 = ListItemViewModel(name = "3", selected = true, checkboxShowing = true)
-        val list = mutableListOf(
-                item1,
-                ListItemViewModel(name = "2", selected = false, checkboxShowing = true),
-                item3,
-                ListItemViewModel(name = "4", selected = false, checkboxShowing = true)
-        )
-        listAdapter.items = list
-
-        // TODO:
-//        listAdapter.checkboxClicked(true)
-
-        verify(callback).filterList(listOf(item1.id, item3.id))
-        verifyNoMoreInteractions(callback)
-    }
-
-    @Test
-    fun checkboxClicked_whenUnchecked_andMoreThanZeroSelected_filterListOnly() {
-        val item4 = ListItemViewModel(name = "4", selected = true, checkboxShowing = true)
-        val list = mutableListOf(
-                ListItemViewModel(name = "1", selected = false, checkboxShowing = true),
-                ListItemViewModel(name = "2", selected = false, checkboxShowing = true),
-                ListItemViewModel(name = "3", selected = false, checkboxShowing = true),
-                item4
-        )
-        listAdapter.items = list
-
-        // TODO:
-//        listAdapter.checkboxClicked(false)
-
-        verify(callback).filterList(listOf(item4.id))
-        verifyNoMoreInteractions(callback)
     }
 
     @Test

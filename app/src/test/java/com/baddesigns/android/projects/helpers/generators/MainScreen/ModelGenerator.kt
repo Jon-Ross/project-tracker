@@ -29,6 +29,18 @@ class ModelGenerator {
         return ListsDataModel(projectsList, librariesList)
     }
 
+    fun generateConnectedViewModel() : MainScreenViewModel {
+        val projectsListViewModels: MutableList<ListItemViewModel> = generateProjectsViewModelList()
+        val librariesListViewModels: MutableList<ListItemViewModel> = generateLibrariesViewModelList()
+        connectAnyViewModels(projectsListViewModels[0], librariesListViewModels[5])
+        connectAnyViewModels(projectsListViewModels[0], librariesListViewModels[6])
+        connectAnyViewModels(projectsListViewModels[1], librariesListViewModels[2])
+        connectAnyViewModels(projectsListViewModels[1], librariesListViewModels[3])
+        connectAnyViewModels(projectsListViewModels[1], librariesListViewModels[5])
+
+        return MainScreenViewModel(projectsListViewModels, librariesListViewModels)
+    }
+
     fun generateDisconnectedViewModel() : MainScreenViewModel {
         val projectsListViewModels: MutableList<ListItemViewModel> = generateProjectsViewModelList()
         val librariesListViewModels: MutableList<ListItemViewModel> = generateLibrariesViewModelList()
@@ -38,6 +50,11 @@ class ModelGenerator {
 }
 
 fun connectAnyDataModels(item1: ListItemModel, item2: ListItemModel) {
+    item1.connections.add(item2.id)
+    item2.connections.add(item1.id)
+}
+
+fun connectAnyViewModels(item1: ListItemViewModel, item2: ListItemViewModel) {
     item1.connections.add(item2.id)
     item2.connections.add(item1.id)
 }

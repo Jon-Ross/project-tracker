@@ -102,6 +102,11 @@ class DummyDataProviderTest {
     }
 
     @Test
+    fun getCachedLists() {
+        assertEquals(dataProvider.model, dataProvider.getCachedLists())
+    }
+
+    @Test
     fun connectModels_passing2ExistingModels_connectsWithEachOtherAndReturnsTrue() {
         val project = dataProvider.model.projectsList[0]
         val library = dataProvider.model.librariesList[0]

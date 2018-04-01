@@ -31,11 +31,15 @@ object DummyDataProvider : IMainScreenDataProvider {
     }
 
     override fun fetchLists() : ListsDataModel {
-        return model
+        return model.deepCopy()
     }
 
     override fun fetchLists(callback: IMainScreenDataProvider.Callback) {
-        callback.onListsRetrieved(model)
+        callback.onListsRetrieved(model.deepCopy())
+    }
+
+    override fun getCachedLists() : ListsDataModel {
+        return model.deepCopy()
     }
 
     override fun connectItems(item1: ListItemModel, item2: ListItemModel) : Boolean {

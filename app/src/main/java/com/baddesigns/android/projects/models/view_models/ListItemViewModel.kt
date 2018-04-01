@@ -9,5 +9,6 @@ data class ListItemViewModel(
         val name: String = "",
         var selected: Boolean = false,
         var checkboxShowing: Boolean = true,
+        val connections: MutableSet<UUID> = mutableSetOf(),
         val id: UUID = UUID.randomUUID()
 )

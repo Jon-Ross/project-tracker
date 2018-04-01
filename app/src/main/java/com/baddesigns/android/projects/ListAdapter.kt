@@ -2,7 +2,6 @@ package com.baddesigns.android.projects
 
 import android.support.v7.widget.AppCompatCheckBox
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -90,8 +89,6 @@ class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         itemCheckBox.setOnCheckedChangeListener {
             _ , checked ->
                 item.selected = checked
-                Log.d("ListAdapter", "item id: ${item.id}")
-                Log.d("ListAdapter", "item name: ${item.name}")
                 callback.checkboxClicked(checked, item.id)
         }
         when(item.checkboxShowing) {

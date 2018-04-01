@@ -132,10 +132,11 @@ class MainActivity : AppCompatActivity(), MainScreenContract.View {
         connectAnyDataModels(projects[1], libraries[5])
         connectAnyDataModels(projects[2], libraries[0])
 
-        DummyDataProvider.addLibraryItems(libraries)
-        DummyDataProvider.addProjectItems(projects)
+        val dataProvider = DummyDataProvider
+        dataProvider.addLibraryItems(libraries)
+        dataProvider.addProjectItems(projects)
 
-        presenter = MainScreenPresenter(DummyDataProvider, MainScreenMapper())
+        presenter = MainScreenPresenter(dataProvider, MainScreenMapper())
         presenter.setView(this)
     }
 

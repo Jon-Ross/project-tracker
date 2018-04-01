@@ -8,8 +8,9 @@ import com.baddesigns.android.projects.models.data_models.ListsDataModel
  */
 interface IMainScreenDataProvider {
 
-    fun fetchLists() : ListsDataModel
     fun fetchLists(callback: Callback)
+    fun fetchLists() : ListsDataModel
+    fun getCachedLists(): ListsDataModel
     fun addProjectItems(vararg items: ListItemModel)
     fun addProjectItems(items: List<ListItemModel>)
     fun addLibraryItems(vararg items: ListItemModel)
@@ -20,5 +21,4 @@ interface IMainScreenDataProvider {
     interface Callback {
         fun onListsRetrieved(lists: ListsDataModel)
     }
-
 }

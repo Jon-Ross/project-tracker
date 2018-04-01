@@ -6,6 +6,7 @@ import com.baddesigns.android.projects.mappers.MainScreenMapper
 import com.baddesigns.android.projects.models.data_models.ListItemModel
 import com.baddesigns.android.projects.models.data_models.ListsDataModel
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
+import com.baddesigns.android.projects.models.view_models.MainScreenViewModel
 import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -19,18 +20,19 @@ import java.util.*
  */
 class MainScreenPresenterTest {
 
-    private val modelGenerator = ModelGenerator()
-    private lateinit var dataModel: ListsDataModel
-    private val modelMapper = MainScreenMapper()
-
     @Mock
     private lateinit var dataProvider: IMainScreenDataProvider
     @Mock
     private lateinit var view: MainScreenContract.View
     @Mock
-    private lateinit var mapper: MainScreenMapper
+    private lateinit var mockMapper: MainScreenMapper
+
+    private lateinit var dataModel: ListsDataModel
+    private lateinit var viewModel: MainScreenViewModel
     private lateinit var allProjects: MutableList<ListItemModel>
     private lateinit var allLibraries: MutableList<ListItemModel>
+    private val modelGenerator = ModelGenerator()
+    private val modelMapper = MainScreenMapper()
 
     private lateinit var presenter: MainScreenPresenter
 
@@ -39,11 +41,13 @@ class MainScreenPresenterTest {
         initMocks(this)
 
         dataModel = modelGenerator.generateConnectedDataModel()
+        viewModel = modelMapper.mapDataToView(dataModel)
 
-        presenter = MainScreenPresenter(dataProvider, mapper)
+        presenter = MainScreenPresenter(dataProvider, mockMapper)
         presenter.setView(view)
 
-        `when`(dataProvider.fetchLists()).thenReturn(dataModel)
+        `when`(dataProvider.fetchLists()).thenReturn(dataModel.copy())
+        `when`(dataProvider.getCachedLists()).thenReturn(dataModel.copy())
         allProjects = dataModel.projectsList
         allLibraries = dataModel.librariesList
     }
@@ -55,19 +59,9 @@ class MainScreenPresenterTest {
         verify(dataProvider).fetchLists(presenter)
     }
 
-    private val listsDataModel: ListsDataModel
-        get() {
-            val dataModel = modelGenerator.generateConnectedDataModel()
-            return dataModel
-        }
-
     @Test
     fun onListsRetrieved() {
-        val dataModel = modelGenerator.generateConnectedDataModel()
-
-        val viewModel = modelGenerator.generateDisconnectedViewModel()
-
-        `when`(mapper.mapDataToView(dataModel)).thenReturn(viewModel)
+        `when`(mockMapper.mapDataToView(dataModel)).thenReturn(viewModel)
 
         presenter.onListsRetrieved(dataModel)
 
@@ -116,23 +110,21 @@ class MainScreenPresenterTest {
         assertEquals(newView, presenter.view)
     }
 
-    // TODO: need to make a copy of the lists as otherwise when changing their states, they
-    // change them in the implementation too
     @Test
     fun projectsListItemCheckboxClicked_checked_filtersProjectsAndLibraries() {
         val mappedProjectVM = modelMapper.mapDataModelToViewModel(allProjects[0])
-        `when`(mapper.mapDataModelToViewModel(allProjects[0])).thenReturn(mappedProjectVM)
 
-        val filteredProjectsVM: List<ListItemViewModel> = listOf(mappedProjectVM)
+        `when`(mockMapper.mapDataModelToViewModel(allProjects[0])).thenReturn(mappedProjectVM)
+
+        val filteredProjectsVM = listOf(mappedProjectVM)
         filteredProjectsVM[0].checkboxShowing = true
         filteredProjectsVM[0].selected = true
 
         val filteredLibs = listOf(allLibraries[5], allLibraries[6])
-        val filteredLibrariesVM: List<ListItemViewModel> =
-                modelMapper.mapDataModelListToViewModelList(filteredLibs)
+        val filteredLibrariesVM = modelMapper.mapDataModelListToViewModelList(filteredLibs)
         filteredLibrariesVM[0].checkboxShowing = false
         filteredLibrariesVM[1].checkboxShowing = false
-        `when`(mapper.mapDataModelListToViewModelList(filteredLibs)).thenReturn(filteredLibrariesVM)
+        `when`(mockMapper.mapDataModelListToViewModelList(filteredLibs)).thenReturn(filteredLibrariesVM)
 
         presenter.projectsListItemCheckboxClicked(true, allProjects[0].id)
 
@@ -140,55 +132,127 @@ class MainScreenPresenterTest {
         verify(view).updateLibrariesListView(filteredLibrariesVM)
     }
 
-    // TODO: need to make a copy of the lists as otherwise when changing their states, they
-    // change them in the implementation too
     @Test
     fun projectsListItemCheckboxClicked_unchecked_removesAllFilters() {
         val projectsVM = modelMapper.mapDataModelListToViewModelList(allProjects)
-        val librariesVM: List<ListItemViewModel> =
-                modelMapper.mapDataModelListToViewModelList(allLibraries)
-        `when`(mapper.mapDataModelListToViewModelList(allProjects)).thenReturn(projectsVM)
-        `when`(mapper.mapDataModelListToViewModelList(allLibraries)).thenReturn(librariesVM)
+        val librariesVM = modelMapper.mapDataModelListToViewModelList(allLibraries)
 
-        resetViewModelsListStates(projectsVM)
-        resetViewModelsListStates(librariesVM)
+        `when`(mockMapper.mapDataModelListToViewModelList(allProjects)).thenReturn(projectsVM)
+        `when`(mockMapper.mapDataModelListToViewModelList(allLibraries)).thenReturn(librariesVM)
+
+        val projectsVMFinalState = copyVMList(projectsVM)
+        val librariesVMFinalState = copyVMList(librariesVM)
+        resetViewModelsListStates(projectsVMFinalState)
+        resetViewModelsListStates(librariesVMFinalState)
 
         presenter.projectsListItemCheckboxClicked(false, allProjects[0].id)
 
-        verify(view).updateProjectsListView(projectsVM)
-        verify(view).updateLibrariesListView(librariesVM)
+        verify(view).updateProjectsListView(projectsVMFinalState)
+        verify(view).updateLibrariesListView(librariesVMFinalState)
     }
 
-    // TODO: need to make a copy of the lists as otherwise when changing their states, they
-    // change them in the implementation too
     @Test
-    fun librariesListItemCheckboxClicked_checked_onlyOneCheck_hideProjectsCheckboxes() {
-        val projectsVM = modelMapper.mapDataModelListToViewModelList(allProjects)
-        `when`(view.getProjectsList()).thenReturn(projectsVM)
+    fun librariesListItemCheckboxClicked_checked_1_hideProjectsCheckboxes_andFilterProjects() {
+        val givenProjectsVM = modelMapper.mapDataModelListToViewModelList(allProjects)
+        val givenLibrariesVM = modelMapper.mapDataModelListToViewModelList(allLibraries)
+        givenLibrariesVM[5].selected = true
 
-        setVisibilityAllViewModelsCheckboxes(projectsVM, false)
+        `when`(view.getProjectsList()).thenReturn(givenProjectsVM)
+        `when`(view.getLibrariesList()).thenReturn(givenLibrariesVM)
 
-        presenter.librariesListItemCheckboxClicked(true, UUID.randomUUID())
+        val projectsVMFinalState = copyVMList(givenProjectsVM)
+        projectsVMFinalState.removeAt(2)
+        setVisibilityAllViewModelsCheckboxes(projectsVMFinalState, false)
 
-        verify(view).updateProjectsListView(projectsVM)
+        presenter.librariesListItemCheckboxClicked(true, allLibraries[5].id)
+
+        verify(view).updateProjectsListView(projectsVMFinalState)
     }
 
-    // TODO: need to make a copy of the lists as otherwise when changing their states, they
-    // change them in the implementation too
     @Test
-    fun librariesListItemCheckboxClicked_unchecked_noChecks_showProjectsCheckboxes() {
-        val projectsVM = modelMapper.mapDataModelListToViewModelList(allProjects)
-        val librariesVM = modelMapper.mapDataModelListToViewModelList(allLibraries)
-        setCheckedAllViewModelsCheckboxes(librariesVM, false)
+    fun librariesListItemCheckboxClicked_checked_2_hideProjectsCheckboxes_andFilterProjects() {
+        val givenProjectsVM = modelMapper.mapDataModelListToViewModelList(allProjects) as MutableList
+        givenProjectsVM.removeAt(2)
+        val givenLibrariesVM = modelMapper.mapDataModelListToViewModelList(allLibraries)
+        givenLibrariesVM[2].selected = true
+        givenLibrariesVM[5].selected = true
+        setVisibilityAllViewModelsCheckboxes(givenProjectsVM, false)
 
-        `when`(view.getProjectsList()).thenReturn(projectsVM)
-        `when`(view.getLibrariesList()).thenReturn(librariesVM)
+        `when`(view.getProjectsList()).thenReturn(givenProjectsVM)
+        `when`(view.getLibrariesList()).thenReturn(givenLibrariesVM)
 
-        setVisibilityAllViewModelsCheckboxes(projectsVM, true)
+        val projectsVMFinalState = listOf(givenProjectsVM[1])
 
-        presenter.librariesListItemCheckboxClicked(false, UUID.randomUUID())
+        presenter.librariesListItemCheckboxClicked(true, allLibraries[2].id)
 
-        verify(view).updateProjectsListView(projectsVM)
+        verify(view).updateProjectsListView(projectsVMFinalState)
+    }
+
+    @Test
+    fun librariesListItemCheckboxClicked_unchecked_0_showProjectsCheckboxes_removeProjectFilters() {
+        val givenProjectsVM = modelMapper.mapDataModelListToViewModelList(allProjects) as MutableList
+        val finalProjectsVM = copyVMList(givenProjectsVM)
+        givenProjectsVM.removeAt(2)
+        setVisibilityAllViewModelsCheckboxes(givenProjectsVM, false)
+        val givenLibrariesVM = modelMapper.mapDataModelListToViewModelList(allLibraries)
+        setCheckedAllViewModelsCheckboxes(givenLibrariesVM, false)
+
+        `when`(mockMapper.mapDataToView(dataModel)).thenReturn(viewModel)
+        `when`(view.getProjectsList()).thenReturn(givenProjectsVM)
+        `when`(view.getLibrariesList()).thenReturn(givenLibrariesVM)
+
+        setVisibilityAllViewModelsCheckboxes(finalProjectsVM, true)
+
+        presenter.librariesListItemCheckboxClicked(false, allLibraries[5].id)
+
+        verify(view).updateProjectsListView(finalProjectsVM)
+    }
+
+    @Test
+    fun librariesListItemCheckboxClicked_unchecked_1_filterProjects() {
+        val givenProjectsVM = viewModel.deepCopy().projectsList as MutableList
+        val finalProjectsVM = copyVMList(givenProjectsVM)
+        givenProjectsVM.removeAt(2)
+        givenProjectsVM.removeAt(0)
+        val givenLibrariesVM = viewModel.librariesList
+        givenLibrariesVM[5].selected = true
+
+        `when`(mockMapper.mapDataToView(dataModel)).thenReturn(viewModel.deepCopy())
+        `when`(view.getProjectsList()).thenReturn(givenProjectsVM)
+        `when`(view.getLibrariesList()).thenReturn(givenLibrariesVM)
+
+        finalProjectsVM.removeAt(2)
+        setVisibilityAllViewModelsCheckboxes(finalProjectsVM, false)
+
+        presenter.librariesListItemCheckboxClicked(false, allLibraries[2].id)
+
+        verify(view).updateProjectsListView(finalProjectsVM)
+    }
+
+    private fun deepCopyModel(model: ListsDataModel) : ListsDataModel {
+        return model.copy(projectsList = deepCopyList(model.projectsList) as MutableList,
+                librariesList = deepCopyList(model.librariesList) as MutableList)
+    }
+
+    private fun deepCopyList(list: List<ListItemModel>) : List<ListItemModel> {
+        val listCopy = mutableListOf<ListItemModel>()
+        for(project in list) {
+            val connections = mutableSetOf<UUID>()
+            for(con in project.connections) {
+                connections.add(con)
+            }
+            listCopy.add(project.copy(connections = connections))
+        }
+        return listCopy
+    }
+
+    private fun copyVMList(list: List<ListItemViewModel>) : MutableList<ListItemViewModel> {
+        val listCopy: MutableList<ListItemViewModel> = mutableListOf()
+        for(item in list) {
+            listCopy.add(item.copy(item.name, item.selected, item.checkboxShowing,
+                    id = item.id, connections = item.connections))
+        }
+        return listCopy
     }
 
     private fun resetViewModelsListStates(list: List<ListItemViewModel>) {

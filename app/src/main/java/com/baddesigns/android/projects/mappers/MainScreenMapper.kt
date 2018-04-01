@@ -32,7 +32,8 @@ class MainScreenMapper {
     fun mapDataModelToViewModel(dataModel: ListItemModel) : ListItemViewModel {
         return ListItemViewModel(
                 name = dataModel.name,
-                id = dataModel.id
+                id = dataModel.id,
+                connections = dataModel.connections
         )
     }
 }
