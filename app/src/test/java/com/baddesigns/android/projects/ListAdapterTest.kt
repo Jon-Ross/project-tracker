@@ -1,6 +1,8 @@
 package com.baddesigns.android.projects
 
 import android.view.ViewGroup
+import com.baddesigns.android.projects.helpers.generators.MainScreen.ModelGenerator
+import com.baddesigns.android.projects.models.view_models.ListHeaderViewModel
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNotNull
@@ -23,26 +25,41 @@ import org.robolectric.annotation.Config
 class ListAdapterTest {
 
     @Mock
-    private lateinit var listItemCheckboxListener: ListViewHolder.Callback
+    private lateinit var projectsListItemCheckboxListener: ListViewHolder.Callback
+    @Mock
+    private lateinit var libraryListItemCheckboxListener: ListViewHolder.Callback
 
     private lateinit var listAdapter: ListAdapter
-    private lateinit var listItems: List<ListItemViewModel>
 
     @Before
     fun setUp() {
         initMocks(this)
 
-        listItems = mutableListOf(
-                ListItemViewModel(name = "hello"),
-                ListItemViewModel(name = "world", selected = true),
-                ListItemViewModel(name = "Projects", selected = true),
-                ListItemViewModel(name = "RxJava"))
-        listAdapter = ListAdapter(listItems, listItemCheckboxListener)
+        val models = ModelGenerator().generateConnectedViewModel()
+
+        val projectsHeader = ListHeaderViewModel("Projects",
+                models.projectsList as MutableList<ListItemViewModel>)
+        val librariesHeader = ListHeaderViewModel("Libraries",
+                models.librariesList as MutableList<ListItemViewModel>)
+        val parentList = mutableListOf(projectsHeader, librariesHeader)
+
+        listAdapter = ListAdapter(parentList)
     }
 
     @Test
-    fun onCreateViewHolder() {
-        val viewHolder = listAdapter.onCreateViewHolder(
+    fun onCreateParentViewHolder() {
+        val viewHolder = listAdapter.onCreateParentViewHolder(
+                object : ViewGroup(RuntimeEnvironment.application) {
+                    override fun onLayout(p0: Boolean, p1: Int, p2: Int, p3: Int, p4: Int) {
+                    }
+                }, 0)
+
+        assertNotNull(viewHolder.itemView.findViewById(R.id.headerTitle))
+    }
+
+    @Test
+    fun onCreateChildViewHolder() {
+        val viewHolder = listAdapter.onCreateChildViewHolder(
                 object : ViewGroup(RuntimeEnvironment.application) {
             override fun onLayout(p0: Boolean, p1: Int, p2: Int, p3: Int, p4: Int) {
             }
@@ -53,41 +70,66 @@ class ListAdapterTest {
     }
 
     @Test
-    fun getItemCount() {
-        assertEquals(4, listAdapter.itemCount)
+    fun onBindParentViewHolder() {
+        val viewHolder = mock(HeaderViewHolder::class.java)
+        val model = mock(ListHeaderViewModel::class.java)
+
+        listAdapter.onBindParentViewHolder(viewHolder, 0, model)
+
+        verify(viewHolder).bindView(model)
     }
 
     @Test
-    fun onBindViewHolder() {
+    fun onBindChildViewHolder_setProjectsListener() {
+        listAdapter.setProjectsItemCheckboxListener(projectsListItemCheckboxListener)
         val viewHolder = mock(ListViewHolder::class.java)
-        listAdapter.onBindViewHolder(viewHolder, 0)
+        val model = ListItemViewModel(itemType = ItemType.PROJECT)
 
-        verify(viewHolder).setCallback(listItemCheckboxListener)
-        verify(viewHolder).bindView(listAdapter.items[0])
+        listAdapter.onBindChildViewHolder(viewHolder, 0, 0, model)
+
+        verify(viewHolder).setCallback(projectsListItemCheckboxListener)
+        verify(viewHolder).bindView(model)
     }
 
     @Test
-    fun getListItems() {
-        assertEquals(listItems, listAdapter.getListItems())
+    fun onBindChildViewHolder_setLibrariesListener() {
+        listAdapter.setLibrariesItemCheckboxListener(libraryListItemCheckboxListener)
+        val viewHolder = mock(ListViewHolder::class.java)
+        val model = ListItemViewModel(itemType = ItemType.LIBRARY)
+
+        listAdapter.onBindChildViewHolder(viewHolder, 0, 0, model)
+
+        verify(viewHolder).setCallback(libraryListItemCheckboxListener)
+        verify(viewHolder).bindView(model)
     }
 
     @Test
-    fun setListItems() {
+    fun setProjectsListItems() {
         val newList = mutableListOf(ListItemViewModel("hello"))
 
-        listAdapter.setListItems(newList)
+        listAdapter.setProjectsListItems(newList)
 
-        assertEquals(newList, listAdapter.items)
+        assertEquals(newList, listAdapter.items[0].list)
     }
 
     @Test
-    fun updateList() {
-        val list: List<ListItemViewModel> = mutableListOf(
-                ListItemViewModel(name = "Projects", selected = true)
-        )
-        listAdapter.setListItems(list)
+    fun setLibrariesListItems() {
+        val newList = mutableListOf(ListItemViewModel("hello"))
 
-        assertEquals(1, listAdapter.itemCount)
+        listAdapter.setLibrariesListItems(newList)
+
+        assertEquals(newList, listAdapter.items[1].list)
+    }
+
+    @Test
+    fun setParentList() {
+        val list = mutableListOf(
+                ListHeaderViewModel("list1", mutableListOf(ListItemViewModel())),
+                ListHeaderViewModel("list2", mutableListOf(ListItemViewModel())))
+
+        listAdapter.setParentList(list, true)
+
+        assertEquals(2, listAdapter.items.size)
         assertEquals(list, listAdapter.items)
     }
 }

@@ -1,14 +1,16 @@
 package com.baddesigns.android.projects
 
 import android.content.Intent
-import android.graphics.drawable.Drawable
+import com.baddesigns.android.projects.models.view_models.ListHeaderViewModel
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
+import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNotNull
 import kotlinx.android.synthetic.main.activity_main.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
 import org.robolectric.Robolectric
@@ -28,15 +30,10 @@ class MainActivityTest {
     @Mock
     private lateinit var presenter: MainScreenContract.Presenter
     @Mock
-    private lateinit var projectsAdapter: ListAdapter
-    @Mock
-    private lateinit var librariesAdapter: ListAdapter
+    private lateinit var adapter: ListAdapter
 
     private lateinit var activity: MainActivity
     private lateinit var activityController: ActivityController<MainActivity>
-
-    private lateinit var upArrowDrawableState: Drawable.ConstantState
-    private lateinit var downArrowDrawableState: Drawable.ConstantState
 
     @Before
     fun setUp() {
@@ -47,23 +44,14 @@ class MainActivityTest {
         activityController.create()
         activity = activityController.get()
 
-        upArrowDrawableState = activity.upArrowDrawable!!.constantState
-        downArrowDrawableState = activity.downArrowDrawable!!.constantState
-
         testOnCreate()
 
         // Setting mocks
         activity.presenter = presenter
-        activity.adapter = projectsAdapter
-        activity.librariesAdapter = librariesAdapter
+        activity.adapter = adapter
     }
 
     private fun testOnCreate() {
-        assertNotNull(activity.upArrowDrawable)
-        assertNotNull(activity.downArrowDrawable)
-
-        // headers start expanded
-
         assertNotNull(activity.listsView.layoutManager)
         assertNotNull(activity.adapter)
         assertNotNull(activity.listsView.adapter)
@@ -85,7 +73,7 @@ class MainActivityTest {
 
         activity.updateProjectsListView(viewModels)
 
-        verify(projectsAdapter).setListItems(viewModels)
+        verify(adapter).setProjectsListItems(viewModels)
     }
 
     @Test
@@ -94,7 +82,7 @@ class MainActivityTest {
 
         activity.updateLibrariesListView(viewModels)
 
-        verify(librariesAdapter).setListItems(viewModels)
+        verify(adapter).setLibrariesListItems(viewModels)
     }
 
     @Test
@@ -119,15 +107,25 @@ class MainActivityTest {
 
     @Test
     fun getProjectsList() {
-        activity.getProjectsList()
+        val returnList = mutableListOf(
+                ListHeaderViewModel("1", mutableListOf(ListItemViewModel("hello"))),
+                ListHeaderViewModel("2", mutableListOf(ListItemViewModel("world"))))
+        `when`(adapter.parentList).thenReturn(returnList)
 
-        verify(projectsAdapter).getListItems()
+        val list = activity.getProjectsList()
+
+        assertEquals(list, returnList[0].list)
     }
 
     @Test
     fun getLibrariesList() {
-        activity.getLibrariesList()
+        val returnList = mutableListOf(
+                ListHeaderViewModel("1", mutableListOf(ListItemViewModel("hello"))),
+                ListHeaderViewModel("2", mutableListOf(ListItemViewModel("world"))))
+        `when`(adapter.parentList).thenReturn(returnList)
 
-        verify(librariesAdapter).getListItems()
+        val list = activity.getLibrariesList()
+
+        assertEquals(list, returnList[1].list)
     }
 }

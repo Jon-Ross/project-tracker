@@ -1,6 +1,5 @@
 package com.baddesigns.android.projects
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -9,6 +8,7 @@ import com.baddesigns.android.projects.generaters.connectAnyDataModels
 import com.baddesigns.android.projects.generaters.generateLibrariesDataModelList
 import com.baddesigns.android.projects.generaters.generateProjectsDataModelList
 import com.baddesigns.android.projects.mappers.MainScreenMapper
+import com.baddesigns.android.projects.models.view_models.ListHeaderViewModel
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -18,10 +18,6 @@ class MainActivity : AppCompatActivity(), MainScreenContract.View {
     internal lateinit var presenter: MainScreenContract.Presenter
 
     internal lateinit var adapter: ListAdapter
-    internal lateinit var librariesAdapter: ListAdapter
-
-    internal var upArrowDrawable: Drawable? = null
-    internal var downArrowDrawable: Drawable? = null
 
     internal val projectsListItemCheckboxCallback: ListViewHolder.Callback =
             object : ListViewHolder.Callback {
@@ -52,25 +48,37 @@ class MainActivity : AppCompatActivity(), MainScreenContract.View {
         presenter.start()
     }
 
-    override fun updateProjectsListView(projectsListViewModel: List<ListItemViewModel>) {
-        adapter.setListItems(projectsListViewModel)
+    override fun updateProjectsListView(projectsListViewModels: List<ListItemViewModel>) {
+        adapter.setProjectsListItems(projectsListViewModels)
     }
 
-    override fun updateLibrariesListView(librariesListViewModel: List<ListItemViewModel>) {
-        librariesAdapter.setListItems(librariesListViewModel)
+    override fun updateLibrariesListView(librariesListViewModels: List<ListItemViewModel>) {
+        adapter.setLibrariesListItems(librariesListViewModels)
+    }
+
+    override fun updateListsView(projectsListViewModels: List<ListItemViewModel>,
+                                 librariesListViewModels: List<ListItemViewModel>) {
+        val projectsHeader = ListHeaderViewModel("Projects",
+                projectsListViewModels as MutableList<ListItemViewModel>)
+        val librariesHeader = ListHeaderViewModel("Libraries",
+                librariesListViewModels as MutableList<ListItemViewModel>)
+        val parentList = mutableListOf(projectsHeader, librariesHeader)
+        adapter.setParentList(parentList, true)
     }
 
     override fun getProjectsList() : List<ListItemViewModel> {
-        return adapter.getListItems()
+        return adapter.parentList[0].list
     }
 
     override fun getLibrariesList() : List<ListItemViewModel> {
-        return librariesAdapter.getListItems()
+        return adapter.parentList[1].list
     }
 
     private fun initListsViews() {
         listsView.layoutManager = LinearLayoutManager(this)
-        adapter = ListAdapter(mutableListOf(), projectsListItemCheckboxCallback)
+        adapter = ListAdapter(mutableListOf())
+        adapter.setProjectsItemCheckboxListener(projectsListItemCheckboxCallback)
+        adapter.setLibrariesItemCheckboxListener(librariesListItemCheckboxCallback)
         listsView.adapter = adapter
     }
 

@@ -23,8 +23,7 @@ class MainScreenPresenter(private val dataProvider: IMainScreenDataProvider,
     override fun onListsRetrieved(lists: ListsDataModel) {
         val viewModel = mapper.mapDataToView(lists)
 
-        view.updateProjectsListView(viewModel.projectsList)
-        view.updateLibrariesListView(viewModel.librariesList)
+        view.updateListsView(viewModel.projectsList, viewModel.librariesList)
     }
 
     override fun projectsListItemCheckboxClicked(checked: Boolean, id: UUID) {
@@ -63,8 +62,7 @@ class MainScreenPresenter(private val dataProvider: IMainScreenDataProvider,
             resetViewModelsListStates(projectsVM)
             resetViewModelsListStates(librariesVM)
         }
-        view.updateProjectsListView(projectsVM)
-        view.updateLibrariesListView(librariesVM)
+        view.updateListsView(projectsVM, librariesVM)
     }
 
     override fun librariesListItemCheckboxClicked(checked: Boolean, id: UUID) {

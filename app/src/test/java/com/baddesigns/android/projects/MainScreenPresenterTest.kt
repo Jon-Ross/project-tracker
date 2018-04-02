@@ -65,40 +65,7 @@ class MainScreenPresenterTest {
 
         presenter.onListsRetrieved(dataModel)
 
-        verify(view).updateProjectsListView(viewModel.projectsList)
-        verify(view).updateLibrariesListView(viewModel.librariesList)
-    }
-
-    @Test
-    fun projectsHeaderClicked_toShowing() {
-        presenter.projectsHeaderArrowClicked(false)
-
-        verify(view).changeProjectsHeaderArrow(true)
-        verify(view).changeProjectsListVisibility(true)
-    }
-
-    @Test
-    fun projectsHeaderClicked_toHidden() {
-        presenter.projectsHeaderArrowClicked(true)
-
-        verify(view).changeProjectsHeaderArrow(false)
-        verify(view).changeProjectsListVisibility(false)
-    }
-
-    @Test
-    fun librariesHeaderClicked_toShowing() {
-        presenter.librariesHeaderArrowClicked(false)
-
-        verify(view).changeLibrariesHeaderArrow(true)
-        verify(view).changeLibrariesListVisibility(true)
-    }
-
-    @Test
-    fun librariesHeaderClicked_toHidden() {
-        presenter.librariesHeaderArrowClicked(true)
-
-        verify(view).changeLibrariesHeaderArrow(false)
-        verify(view).changeLibrariesListVisibility(false)
+        verify(view).updateListsView(viewModel.projectsList, viewModel.librariesList)
     }
 
     @Test
@@ -128,8 +95,7 @@ class MainScreenPresenterTest {
 
         presenter.projectsListItemCheckboxClicked(true, allProjects[0].id)
 
-        verify(view).updateProjectsListView(filteredProjectsVM)
-        verify(view).updateLibrariesListView(filteredLibrariesVM)
+        verify(view).updateListsView(filteredProjectsVM, filteredLibrariesVM)
     }
 
     @Test
@@ -147,8 +113,7 @@ class MainScreenPresenterTest {
 
         presenter.projectsListItemCheckboxClicked(false, allProjects[0].id)
 
-        verify(view).updateProjectsListView(projectsVMFinalState)
-        verify(view).updateLibrariesListView(librariesVMFinalState)
+        verify(view).updateListsView(projectsVMFinalState, librariesVMFinalState)
     }
 
     @Test

@@ -9,8 +9,10 @@ import java.util.*
 interface MainScreenContract {
 
     interface View : IMvpView {
-        fun updateProjectsListView(projectsListViewModel: List<ListItemViewModel>)
-        fun updateLibrariesListView(librariesListViewModel: List<ListItemViewModel>)
+        fun updateListsView(projectsListViewModels: List<ListItemViewModel>,
+                            librariesListViewModels: List<ListItemViewModel>)
+        fun updateProjectsListView(projectsListViewModels: List<ListItemViewModel>)
+        fun updateLibrariesListView(librariesListViewModels: List<ListItemViewModel>)
         fun getProjectsList(): List<ListItemViewModel>
         fun getLibrariesList(): List<ListItemViewModel>
     }

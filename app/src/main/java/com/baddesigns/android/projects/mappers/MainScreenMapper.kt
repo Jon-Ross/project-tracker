@@ -33,7 +33,8 @@ class MainScreenMapper {
         return ListItemViewModel(
                 name = dataModel.name,
                 id = dataModel.id,
-                connections = dataModel.connections
+                connections = dataModel.connections,
+                itemType = dataModel.itemType
         )
     }
 }
