@@ -2,9 +2,8 @@ package com.baddesigns.android.projects
 
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.view.View
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
-import junit.framework.Assert.*
+import junit.framework.Assert.assertNotNull
 import kotlinx.android.synthetic.main.activity_main.*
 import org.junit.Before
 import org.junit.Test
@@ -55,7 +54,7 @@ class MainActivityTest {
 
         // Setting mocks
         activity.presenter = presenter
-        activity.projectsAdapter = projectsAdapter
+        activity.adapter = projectsAdapter
         activity.librariesAdapter = librariesAdapter
     }
 
@@ -64,19 +63,10 @@ class MainActivityTest {
         assertNotNull(activity.downArrowDrawable)
 
         // headers start expanded
-        assertEquals(downArrowDrawableState, activity.projectsHeaderArrow.drawable.constantState)
-        assertEquals(downArrowDrawableState, activity.librariesHeaderArrow.drawable.constantState)
 
-        assertNotNull(activity.projectsListView.layoutManager)
-        assertNotNull(activity.projectsAdapter)
-        assertNotNull(activity.projectsListView.adapter)
-
-        assertNotNull(activity.librariesListView.layoutManager)
-        assertNotNull(activity.librariesAdapter)
-        assertNotNull(activity.librariesListView.adapter)
-
-        assertTrue(activity.projectsHeaderArrow.hasOnClickListeners())
-        assertTrue(activity.librariesHeaderArrow.hasOnClickListeners())
+        assertNotNull(activity.listsView.layoutManager)
+        assertNotNull(activity.adapter)
+        assertNotNull(activity.listsView.adapter)
 
         assertNotNull(activity.presenter)
     }
@@ -105,98 +95,6 @@ class MainActivityTest {
         activity.updateLibrariesListView(viewModels)
 
         verify(librariesAdapter).setListItems(viewModels)
-    }
-
-    @Test
-    fun whenClickProjectsHeaderArrow_contentsWereShowing_delegateToPresenter() {
-        activity.projectsHeaderArrow.setImageDrawable(activity.downArrowDrawable)
-
-        activity.projectsHeaderArrow.performClick()
-
-        verify(presenter).projectsHeaderArrowClicked(true)
-    }
-
-    @Test
-    fun whenClickProjectsHeaderArrow_contentsWereNotShowing_delegateToPresenter() {
-        activity.projectsHeaderArrow.setImageDrawable(activity.upArrowDrawable)
-
-        activity.projectsHeaderArrow.performClick()
-
-        verify(presenter).projectsHeaderArrowClicked(false)
-    }
-
-    @Test
-    fun whenClickLibrariesHeaderArrow_contentsWereShowing_delegateToPresenter() {
-        activity.librariesHeaderArrow.setImageDrawable(activity.downArrowDrawable)
-
-        activity.librariesHeaderArrow.performClick()
-
-        verify(presenter).librariesHeaderArrowClicked(true)
-    }
-
-    @Test
-    fun whenClickLibrariesHeaderArrow_contentsWereNotShowing_delegateToPresenter() {
-        activity.librariesHeaderArrow.setImageDrawable(activity.upArrowDrawable)
-
-        activity.librariesHeaderArrow.performClick()
-
-        verify(presenter).librariesHeaderArrowClicked(false)
-    }
-
-    @Test
-    fun changeProjectsListVisibility_toVisible() {
-        activity.changeProjectsListVisibility(true)
-
-        assertEquals(View.VISIBLE, activity.projectsListView.visibility)
-    }
-
-    @Test
-    fun changeProjectsListVisibility_toGone() {
-        activity.changeProjectsListVisibility(false)
-
-        assertEquals(View.GONE, activity.projectsListView.visibility)
-    }
-
-    @Test
-    fun changeLibrariesListVisibility_toVisible() {
-        activity.changeLibrariesListVisibility(true)
-
-        assertEquals(View.VISIBLE, activity.librariesListView.visibility)
-    }
-
-    @Test
-    fun changeLibrariesListVisibility_toGone() {
-        activity.changeLibrariesListVisibility(false)
-
-        assertEquals(View.GONE, activity.librariesListView.visibility)
-    }
-
-    @Test
-    fun changeProjectsHeaderArrow_toUpArrow() {
-        activity.changeProjectsHeaderArrow(false)
-
-        assertEquals(upArrowDrawableState, activity.projectsHeaderArrow.drawable.constantState)
-    }
-
-    @Test
-    fun changeProjectsHeaderArrow_toDownArrow() {
-        activity.changeProjectsHeaderArrow(true)
-
-        assertEquals(downArrowDrawableState, activity.projectsHeaderArrow.drawable.constantState)
-    }
-
-    @Test
-    fun changeLibrariesHeaderArrow_toUpArrow() {
-        activity.changeLibrariesHeaderArrow(false)
-
-        assertEquals(upArrowDrawableState, activity.librariesHeaderArrow.drawable.constantState)
-    }
-
-    @Test
-    fun changeLibrariesHeaderArrow_toDownArrow() {
-        activity.changeLibrariesHeaderArrow(true)
-
-        assertEquals(downArrowDrawableState, activity.librariesHeaderArrow.drawable.constantState)
     }
 
     @Test

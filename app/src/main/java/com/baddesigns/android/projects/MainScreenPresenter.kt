@@ -27,18 +27,6 @@ class MainScreenPresenter(private val dataProvider: IMainScreenDataProvider,
         view.updateLibrariesListView(viewModel.librariesList)
     }
 
-    override fun projectsHeaderArrowClicked(contentsWereShowing: Boolean) {
-        val toShowing = !contentsWereShowing
-        view.changeProjectsHeaderArrow(toShowing)
-        view.changeProjectsListVisibility(toShowing)
-    }
-
-    override fun librariesHeaderArrowClicked(contentsWereShowing: Boolean) {
-        val toShowing = !contentsWereShowing
-        view.changeLibrariesHeaderArrow(toShowing)
-        view.changeLibrariesListVisibility(toShowing)
-    }
-
     override fun projectsListItemCheckboxClicked(checked: Boolean, id: UUID) {
         val dataModel = dataProvider.fetchLists()
         val projectsList = dataModel.projectsList

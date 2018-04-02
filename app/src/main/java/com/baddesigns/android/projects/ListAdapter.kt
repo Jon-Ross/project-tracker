@@ -28,37 +28,6 @@ class ListAdapter(internal var items: List<ListItemViewModel>,
         holder.bindView(items[position])
     }
 
-    fun setAllCheckboxesVisibility(showing: Boolean) {
-        items.forEach {
-            it.checkboxShowing = showing
-        }
-        notifyDataSetChanged()
-    }
-
-    fun checkboxClicked(checked: Boolean, id: UUID) {
-//        val count = countSelected()
-//        if(count <= 1 && (checked || count <= 0)) callback.setAllCheckboxesVisibility(!checked)
-//
-//        val ids = retrieveSelectedIds()
-//        if(ids.isEmpty()) callback.removeFilter() else callback.filterList(ids)
-    }
-
-    fun retrieveSelectedIds() : List<UUID> {
-        val ids = mutableListOf<UUID>()
-        items.forEach {
-            if(it.selected) ids.add(it.id)
-        }
-        return ids
-    }
-
-    private fun countSelected() : Int {
-        var count = 0
-        items.forEach {
-            if(it.selected) count++
-        }
-        return count
-    }
-
     fun getListItems() : List<ListItemViewModel> {
         return items
     }
@@ -66,12 +35,6 @@ class ListAdapter(internal var items: List<ListItemViewModel>,
     fun setListItems(list: List<ListItemViewModel>) {
         items = list
         notifyDataSetChanged()
-    }
-
-    interface Callback {
-        fun setAllCheckboxesVisibility(showing: Boolean)
-        fun filterList(ids: List<UUID>)
-        fun removeFilter()
     }
 }
 

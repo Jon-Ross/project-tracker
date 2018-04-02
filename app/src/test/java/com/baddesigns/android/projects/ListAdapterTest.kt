@@ -2,7 +2,8 @@ package com.baddesigns.android.projects
 
 import android.view.ViewGroup
 import com.baddesigns.android.projects.models.view_models.ListItemViewModel
-import junit.framework.Assert.*
+import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,8 +22,6 @@ import org.robolectric.annotation.Config
 @Config(constants = BuildConfig::class)
 class ListAdapterTest {
 
-    @Mock
-    private lateinit var callback: ListAdapter.Callback
     @Mock
     private lateinit var listItemCheckboxListener: ListViewHolder.Callback
 
@@ -90,40 +89,5 @@ class ListAdapterTest {
 
         assertEquals(1, listAdapter.itemCount)
         assertEquals(list, listAdapter.items)
-    }
-
-    @Test
-    fun setAllCheckboxesVisibility_whenSetToShowing_holderSetsCheckboxesShowing() {
-        listItems.forEach {
-            it.checkboxShowing = false
-        }
-
-        listAdapter.setAllCheckboxesVisibility(true)
-
-        listItems.forEach {
-            assertTrue(it.checkboxShowing)
-        }
-    }
-
-    @Test
-    fun setAllCheckboxesVisibility_whenSetToNotShowing_holderSetsCheckboxesHidden() {
-        listItems.forEach {
-            it.checkboxShowing = true
-        }
-
-        listAdapter.setAllCheckboxesVisibility(false)
-
-        listItems.forEach {
-            assertFalse(it.checkboxShowing)
-        }
-    }
-
-    @Test
-    fun retrieveSelectedIds() {
-        val ids = listAdapter.retrieveSelectedIds()
-
-        assertEquals(2, ids.size)
-        assertEquals(listItems[1].id, ids[0])
-        assertEquals(listItems[2].id, ids[1])
     }
 }
